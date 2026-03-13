@@ -10,8 +10,14 @@ app.use(express.json());
 
 const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
 const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET;
+
 console.log("LIVEKIT_API_KEY:", LIVEKIT_API_KEY);
 console.log("LIVEKIT_API_SECRET:", LIVEKIT_API_SECRET);
+
+if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET) {
+  console.error("ERROR: LIVEKIT_API_KEY or LIVEKIT_API_SECRET not set");
+  process.exit(1);
+}
 
 app.get("/token", async (req, res) => {
   try {
@@ -20,10 +26,7 @@ app.get("/token", async (req, res) => {
 
     const token = new AccessToken(
       LIVEKIT_API_KEY,
-      LIVEKIT_API_SECRET,
-      {
-        identity: identity,
-      }
+      LIVEKIT_API_SECRET
     );
 
     token.addGrant({
@@ -31,9 +34,12 @@ app.get("/token", async (req, res) => {
       room: roomName,
       canPublish: true,
       canSubscribe: true,
+      identity: identity,
     });
 
-    const jwt = await token.toJwt();
+    const jwt = token.toJwt();
+
+    console.log(`✓ Token generated for ${identity} in ${roomName}`);
 
     res.json({
       token: jwt,
@@ -42,11 +48,19 @@ app.get("/token", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Token generation failed" });
+    console.error("❌ Token generation error:", error);
+    res.status(500).json({ error: "Token generation failed: " + error.message });
   }
 });
 
-app.listen(4000, () => {
-  console.log("Token server running on port 4000");
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+const PORT = 4000;
+app.listen(PORT, () => {
+  console.log(`✓ Token server running on port ${PORT}`);
+  console.log(`✓ Endpoints available at:`);
+  console.log(`  - http://localhost:${PORT}/token`);
+  console.log(`  - http://localhost:${PORT}/health`);
 });

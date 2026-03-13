@@ -1,0 +1,19 @@
+{
+  "name": "agent",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "agent.js",
+  "scripts": {
+    "dev": "node --watch agent.js dev",
+    "start": "node agent.js start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@livekit/agents": "^1.0.50",
+    "dotenv": "^17.3.1"
+  }
+}
